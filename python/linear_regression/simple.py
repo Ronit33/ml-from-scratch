@@ -11,7 +11,7 @@ print(df.sample(3))
 print("Training Scikit learn model:")
 X_train = df['YearsExperience'].values.reshape(-1, 1)
 print(X_train.shape)
-y_train = df['Salary']
+y_train = df['Salary'].values
 
 lr = LinearRegression()
 lr.fit(X=X_train, y=y_train)
@@ -25,27 +25,27 @@ print("*"*100)
 print("Custom model")
 print("*"*100)
 
-class SimpleLR():
+class SimpleLR:
     def __init__(self):
-        self.m = 0
-        self.b = 0
-    
-    def fit(self, X_train: np.ndarray, y_train: np.ndarray):
-        
-        assert len(X_train.shape) == 2, "Shape of X_train should be 2D"
+        self.m = None
+        self.b = None
 
-        num = ((X_train - X_train.mean()).reshape(-1) * (y_train - y_train.mean())).sum()
-        den = ((X_train - X_train.mean())**2).sum()
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray):
+        assert X_train.ndim == 2, "X_train must be 2D"
         
+        x = X_train.reshape(-1)
+        y = y_train.reshape(-1)
+
+        num = ((x - x.mean()) * (y - y.mean())).sum()
+        den = ((x - x.mean()) ** 2).sum()
+
         self.m = num / den
-        self.b = y_train.mean() - (self.m * X_train.mean())      
-        
-        print(self.m, self.b)
-    
+        self.b = y.mean() - self.m * x.mean()
+
     def predict(self, X_test: np.ndarray):
-        assert len(X_test.shape) == 2, "Shape of X_test should be 2D"
-        
-        return (self.m * X_test) + self.b
+        assert X_test.ndim == 2, "X_test must be 2D"
+        return (self.m * X_test + self.b).reshape(-1)
+
     
 lr = SimpleLR()
 lr.fit(X_train=X_train, y_train=y_train)
